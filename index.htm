@@ -20,17 +20,17 @@
 <li>pytest prior to <code>2.1</code> was reinterpreting assertions</li>
 </ul>
 </section><section><h3>Mistakes are still being made</h3>
-</section><section><h3>What i want to see</h3>
+</section><section><h3>rough idea of What i want to see</h3>
 <div class="highlight python"><pre><span></span><span class="k">def</span> <span class="nf">test_sideeffect</span><span class="p">():</span>
   <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
   <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
 </pre></div>
-<div class="highlight text"><pre><span></span>AssertionError: a.pop() == 2
-  where:
-    `a` was [1]
-    `a.pop()` returned 1
-    `a` is []
+<div class="highlight py3tb"><pre><span></span><span class="x">AssertionError: a.pop() == 2</span>
+<span class="x">  where:</span>
+<span class="x">    `a` was [1]</span>
+<span class="x">    `a.pop()` returned 1</span>
+<span class="x">    `a` is []</span>
 </pre></div>
 <div class="highlight python"><pre><span></span><span class="k">def</span> <span class="nf">test_interesting_missed</span><span class="p">():</span>
     <span class="n">val</span> <span class="o">=</span> <span class="s2">&quot;this could be something very important&quot;</span>
@@ -40,7 +40,6 @@
   where:
     `val` is &quot;this could be something very important&quot;
 </pre></div>
-</section><section><h3>A Proposal</h3>
 </section></div>
         </div>
         <script src="build/presentation.js"></script>

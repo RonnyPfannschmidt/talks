@@ -15,7 +15,7 @@
 
 ### Asserts in python core
 
-```python
+
 
 
 ***
@@ -55,7 +55,7 @@ def test_sideeffect():
   assert a.pop() == 2
 ```
 
-```text
+```py3tb
 AssertionError: a.pop() == 2
   where:
     `a` was [1]
