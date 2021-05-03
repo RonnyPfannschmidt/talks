@@ -14,12 +14,81 @@
 <li>love approachable debugging</li>
 </ul>
 </section><section><h3>Asserts in python core</h3>
+<div class="highlight"><pre><span></span>$ python -m unittest ex.py  -k it
+F
+======================================================================
+FAIL: test_it (ex.TestUnittest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;/home/ronny/Projects/RonnyPfannschmidt/talks/ex.py&quot;, line 11, in test_it
+    self.assertEqual(a, b)
+AssertionError: Items in the first set but not the second:
+&#39;1&#39;
+Items in the second set but not the first:
+&#39;5&#39;
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)
+</pre></div>
 </section><section><h3>Asserts in pytest</h3>
+<div class="highlight"><pre><span></span>$ pytest ex.py -k side 
+==================================================================================================================================================== test session starts =====================================================================================================================================================
+platform linux -- Python 3.9.4, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
+rootdir: /home/ronny/Projects/RonnyPfannschmidt/talks
+collected 5 items / 4 deselected / 1 selected                                                                                                                                                                                                                                                                                
+
+ex.py F                                                                                                                                                                                                                                                                                                                [100%]
+
+========================================================================================================================================================== FAILURES ==========================================================================================================================================================
+______________________________________________________________________________________________________________________________________________________ test_sideeffect _______________________________________________________________________________________________________________________________________________________
+
+    def test_sideeffect():
+      a = [1]
+
+&gt;     assert a.pop() == 2
+E     assert 1 == 2
+E      +  where 1 = &lt;built-in method pop of list object at 0x7fed6a676d80&gt;()
+E      +    where &lt;built-in method pop of list object at 0x7fed6a676d80&gt; = [].pop
+
+ex.py:24: AssertionError
+================================================================================================================================================== short test summary info ===================================================================================================================================================
+FAILED ex.py::test_sideeffect - assert 1 == 2
+
+
+</pre></div>
 </section><section><h3>Mistakes have been made</h3>
 <ul>
-<li>pytest prior to <code>2.1</code> was reinterpreting assertions</li>
+<li><p>pytest prior to <code>2.1</code> was reinterpreting assertions</p>
+</li>
+<li><p>no example here, not even going to try to install a 10 year old pytest these days ^^</p>
+</li>
 </ul>
 </section><section><h3>Mistakes are still being made</h3>
+<div class="highlight"><pre><span></span>$ hammett ex.py -k sideeffect
+F
+
+Failed: .ex.test_sideeffect
+Traceback (most recent call last):
+  File &quot;.../site-packages/hammett/impl.py&quot;, line 527, in run_test
+    resolved_function(**resolved_kwargs)
+  File &quot;ex.py&quot;, line 24, in test_sideeffect
+    assert a.pop() == 2
+AssertionError
+
+
+
+--- Local variables ---
+a:
+    []
+
+--- Assert components ---
+Failed to analyze assert statement (&lt;class &#39;IndexError&#39;&gt;: pop from empty list)
+
+0 succeeded, 1 failed, 0 skipped
+
+</pre></div>
 </section><section><h3>rough idea of What i want to see</h3>
 <div class="highlight python"><pre><span></span><span class="k">def</span> <span class="nf">test_sideeffect</span><span class="p">():</span>
   <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
