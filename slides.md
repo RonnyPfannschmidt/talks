@@ -110,7 +110,7 @@ Failed to analyze assert statement (<class 'IndexError'>: pop from empty list)
 
 
 
-### rough idea of What i want to see
+### rough idea of What i want to see in  python
 
 
 ```python
@@ -138,4 +138,46 @@ def test_interesting_missed():
 AssertionError: val is None
   where:
     `val` is "this could be something very important"
+```
+
+
+***
+
+### what pytest does
+
+```python
+    # Now actually insert the special imports.
+    if sys.version_info >= (3, 10):
+        aliases = [
+            ast.alias("builtins", "@py_builtins", lineno=lineno, col_offset=0),
+            ast.alias(
+                "_pytest.assertion.rewrite",
+                "@pytest_ar",
+                lineno=lineno,
+                col_offset=0,
+            ),
+        ]
+    else:
+        aliases = [
+            ast.alias("builtins", "@py_builtins"),
+            ast.alias("_pytest.assertion.rewrite", "@pytest_ar"),
+        ]
+```
+
+***
+
+### and then ...
+
+many  like this (breaks semi-regular on python updates)
+```python
+
+    def visit_Name(self, name: ast.Name) -> Tuple[ast.Name, str]:
+        # Display the repr of the name if it's a local variable or
+        # _should_repr_global_name() thinks it's acceptable.
+        locs = ast.Call(self.builtin("locals"), [], [])
+        inlocs = ast.Compare(ast.Str(name.id), [ast.In()], [locs])
+        dorepr = self.helper("_should_repr_global_name", name)
+        test = ast.BoolOp(ast.Or(), [inlocs, dorepr])
+        expr = ast.IfExp(test, self.display(name), ast.Str(name.id))
+        return name, self.explanation_param(expr)
 ```

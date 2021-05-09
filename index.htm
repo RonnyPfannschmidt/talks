@@ -89,7 +89,7 @@ Failed to analyze assert statement (&lt;class &#39;IndexError&#39;&gt;: pop from
 0 succeeded, 1 failed, 0 skipped
 
 </pre></div>
-</section><section><h3>rough idea of What i want to see</h3>
+</section><section><h3>rough idea of What i want to see in  python</h3>
 <div class="highlight python"><pre><span></span><span class="k">def</span> <span class="nf">test_sideeffect</span><span class="p">():</span>
   <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -108,6 +108,37 @@ Failed to analyze assert statement (&lt;class &#39;IndexError&#39;&gt;: pop from
 <div class="highlight text"><pre><span></span>AssertionError: val is None
   where:
     `val` is &quot;this could be something very important&quot;
+</pre></div>
+</section><section><h3>what pytest does</h3>
+<div class="highlight python"><pre><span></span>    <span class="c1"># Now actually insert the special imports.</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;builtins&quot;</span><span class="p">,</span> <span class="s2">&quot;@py_builtins&quot;</span><span class="p">,</span> <span class="n">lineno</span><span class="o">=</span><span class="n">lineno</span><span class="p">,</span> <span class="n">col_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="s2">&quot;_pytest.assertion.rewrite&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;@pytest_ar&quot;</span><span class="p">,</span>
+                <span class="n">lineno</span><span class="o">=</span><span class="n">lineno</span><span class="p">,</span>
+                <span class="n">col_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;builtins&quot;</span><span class="p">,</span> <span class="s2">&quot;@py_builtins&quot;</span><span class="p">),</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;_pytest.assertion.rewrite&quot;</span><span class="p">,</span> <span class="s2">&quot;@pytest_ar&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+</pre></div>
+</section><section><h3>and then ...</h3>
+<p>many  like this (breaks semi-regular on python updates)</p>
+<div class="highlight python"><pre><span></span>
+    <span class="k">def</span> <span class="nf">visit_Name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="c1"># Display the repr of the name if it&#39;s a local variable or</span>
+        <span class="c1"># _should_repr_global_name() thinks it&#39;s acceptable.</span>
+        <span class="n">locs</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">builtin</span><span class="p">(</span><span class="s2">&quot;locals&quot;</span><span class="p">),</span> <span class="p">[],</span> <span class="p">[])</span>
+        <span class="n">inlocs</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Compare</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">In</span><span class="p">()],</span> <span class="p">[</span><span class="n">locs</span><span class="p">])</span>
+        <span class="n">dorepr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">helper</span><span class="p">(</span><span class="s2">&quot;_should_repr_global_name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">BoolOp</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Or</span><span class="p">(),</span> <span class="p">[</span><span class="n">inlocs</span><span class="p">,</span> <span class="n">dorepr</span><span class="p">])</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">IfExp</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">ast</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explanation_param</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 </pre></div>
 </section></div>
         </div>
